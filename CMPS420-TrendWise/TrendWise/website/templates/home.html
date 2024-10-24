@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Stock Sentiment Analysis{% endblock %}
+
+{% block content %}
+<h1 align="center">Stock Sentiment Analysis Portal</h1>
+
+<!-- Flash messages for success or error -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<!-- Stock ticker search form -->
+<form method="POST">
+  <div class="form-group">
+    <label for="ticker">Enter Stock Ticker:</label>
+    <input type="text" name="ticker" id="ticker" class="form-control" placeholder="AAPL, TSLA, etc." required />
+  </div>
+  <div align="center">
+    <button type="submit" class="btn btn-primary">Search Stock</button>
+  </div>
+</form>
+
+<!-- Display headlines and their sentiment -->
+{% if headlines %}
+  <h3 align="center" style="color:#FFEAAD">Latest Headlines for {{ ticker }}:</h3>
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Headline</th>
+          <th>Sentiment</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for headline, sentiment in headlines %}
+          <tr>
+            <td style="color:#FFEAAD">{{ headline }}</td>
+            <td style="color:#FFEAAD">{{ sentiment }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <a style="color:#FFEAAD">{{ stockdata }}</a>
+  </div>
+
+{% endif %}
+
+{% endblock %}

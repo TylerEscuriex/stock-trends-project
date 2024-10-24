@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+    crossorigin="anonymous" />
+  <link rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    crossorigin="anonymous" />
+
+  <style>
+    body {
+      background-color: rgb(3, 3, 22);
+      display: flex;
+    }
+
+    /* Left-aligned vertical navbar with custom colors */
+    .sidebar {
+      background-color: #028F76;
+      border-radius: 15px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      padding-left: 10px;
+      padding-right: 10px;
+      min-height: 100vh; /* Full height */
+      width: 220px; /* Fixed width for sidebar */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Centered Logo styling */
+    .sidebar .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #FFEAAD;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .nav-link {
+      color: #1C2130 !important;
+      margin-bottom: 15px;
+      font-size: 18px;
+      font-weight: bold;
+      display: block;
+      text-align: center;
+      width: 100%;
+    }
+
+    .nav-link.active {
+      color: #FFEAAD !important;
+      background-color: #1C2130 !important;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .nav-link:hover {
+      color: #FFEAAD !important;
+      background-color: #1C2130 !important;
+      border-radius: 10px;
+    }
+
+    .navbar-toggler {
+      border-color: #1C2130;
+    }
+
+    .navbar-toggler-icon {
+      background-color: #1C2130;
+    }
+
+    /* Main content section next to the sidebar */
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      color: white;
+    }
+
+    /* Custom styles for the table */
+    table {
+      background-color: #1C2130; /* Matches navbar */
+      color: white; /* Text color for table */
+      border: 1px solid #028F76; /* Optional: border for table */
+    }
+
+    th {
+      background-color: #028F76; /* Matches sidebar */
+      color: #FFEAAD; /* Header text color */
+    }
+
+    th, td {
+      padding: 10px; /* Padding for table cells */
+    }
+
+    /* Styles for the list group items */
+    .list-group-item {
+      background-color: #1C2130; /* Match the table background */
+      color: white; /* Set text color to white */
+      border: none; /* Remove border for a clean look */
+    }
+
+    /* Sentiment badge styles */
+    .badge {
+      background-color: #FFEAAD; /* Change badge background color */
+      color: #1C2130; /* Sentiment text color */
+    }
+
+    /* Alert box styles */
+    .alert {
+      border-radius: 10px;
+    }
+  </style>
+
+  <title>{% block title %}Home{% endblock %}</title>
+</head>
+
+<body>
+  <!-- Sidebar (left-aligned navbar) -->
+  <nav class="sidebar navbar navbar-expand-lg navbar-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <!-- Centered Logo -->
+    <div class="logo">TrendWise</div>
+
+    <div class="collapse navbar-collapse" id="navbar">
+      <div class="navbar-nav flex-column w-100">
+        {% if user.is_authenticated %}
+        <a class="nav-item nav-link" id="home" href="/">Research portal</a>
+        <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
+        {% else %}
+        <a class="nav-item nav-link" id="login" href="/login">Login</a>
+        <a class="nav-item nav-link" id="signUp" href="/sign-up">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content section -->
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="container">
+      {% block content %} {% endblock %}
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7W3mgPxhU9K/ScQsAP7HUIbX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+
+  {% block javascript %}
+  <script type="text/javascript">
+    function deleteNote(noteId) {
+      fetch("/delete-note", {
+        method: "POST",
+        body: JSON.stringify({ noteId: noteId }),
+      }).then((_res) => {
+        window.location.href = "/";
+      });
+    }
+  </script>
+  {% endblock %}
+</body>
+
+</html>
