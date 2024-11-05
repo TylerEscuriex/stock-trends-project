@@ -4,7 +4,6 @@
 {% block content %}
 <h1 align="center">Stock Sentiment Analysis Portal</h1>
 
-<!-- Flash messages for success or error -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
@@ -18,7 +17,6 @@
   {% endif %}
 {% endwith %}
 
-<!-- Stock ticker search form -->
 <form method="POST">
   <div class="form-group">
     <label for="ticker">Enter Stock Ticker:</label>
@@ -29,7 +27,6 @@
   </div>
 </form>
 
-<!-- Display headlines and their sentiment -->
 {% if headlines %}
   <h3 align="center" style="color:#FFEAAD">Latest Headlines for {{ ticker }}:</h3>
   <div class="table-responsive">
@@ -49,9 +46,39 @@
         {% endfor %}
       </tbody>
     </table>
-    <a style="color:#FFEAAD">{{ stockdata }}</a>
   </div>
+{% endif %}
 
+{% if stockdata %}
+  <h3 align="center" style="color:#FFEAAD">Financial Data for {{ ticker }}:</h3>
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for metric, value in stockdata.items() %}
+          <tr>
+            <td style="color:#FFEAAD">{{ metric }}</td>
+            <td style="color:#FFEAAD">{{ value }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p align="center" style="color:#FFEAAD">No financial data available for {{ ticker }}. Please try another stock.</p>
+{% endif %}
+
+
+{% if recommendation %}
+  <h3 align="center" style="color:#FFEAAD">GPT Recommendation:</h3>
+  <p align="center" style="color:#FFEAAD">
+    {{ recommendation }}
+  </p>
 {% endif %}
 
 {% endblock %}
