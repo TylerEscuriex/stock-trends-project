@@ -14,104 +14,99 @@
 
   <style>
     body {
-      background-color: rgb(3, 3, 22);
-      display: flex;
-    }
-
-    /* Left-aligned vertical navbar with custom colors */
-    .sidebar {
-      background-color: #028F76;
-      border-radius: 15px;
-      padding-top: 20px;
-      padding-bottom: 20px;
-      padding-left: 10px;
-      padding-right: 10px;
-      min-height: 100vh; /* Full height */
-      width: 220px; /* Fixed width for sidebar */
+      background-color: #121212; /* Black background */
+      color: #A9D18E; /* Light green text */
       display: flex;
       flex-direction: column;
-      align-items: center;
     }
 
-    /* Centered Logo styling */
-    .sidebar .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #FFEAAD;
-      text-align: center;
-      margin-bottom: 30px;
+    /* Top navbar styling */
+    .navbar {
+      background-color: #1B1B1B; /* Darker black for navbar */
+      border-radius: 0;
     }
 
-    .nav-link {
-      color: #1C2130 !important;
-      margin-bottom: 15px;
+    .navbar-nav .nav-link {
+      color: #A9D18E !important; /* Light green text */
       font-size: 18px;
       font-weight: bold;
-      display: block;
-      text-align: center;
-      width: 100%;
     }
 
-    .nav-link.active {
-      color: #FFEAAD !important;
-      background-color: #1C2130 !important;
+    .navbar-nav .nav-link:hover {
+      background-color: #2A2A2A !important; /* Darker gray hover background */
+      color: #7AC142 !important; /* Brighter green on hover */
       border-radius: 10px;
-      padding: 10px;
     }
 
-    .nav-link:hover {
-      color: #FFEAAD !important;
-      background-color: #1C2130 !important;
-      border-radius: 10px;
+    .navbar-brand {
+      font-size: 24px;
+      font-weight: bold;
+      color: #A9D18E; /* Light green text */
     }
 
     .navbar-toggler {
-      border-color: #1C2130;
+      border-color: #A9D18E;
     }
 
     .navbar-toggler-icon {
-      background-color: #1C2130;
+      background-color: #A9D18E;
     }
 
-    /* Main content section next to the sidebar */
+    /* Main content section */
     .content {
-      flex-grow: 1;
       padding: 20px;
-      color: white;
+      color: #A9D18E; /* Light green text */
     }
 
-    /* Custom styles for the table */
+    /* Table styling */
     table {
-      background-color: #1C2130; /* Matches navbar */
-      color: white; /* Text color for table */
-      border: 1px solid #028F76; /* Optional: border for table */
+      background-color: #1B1B1B; /* Dark background */
+      color: #A9D18E; /* Light green text */
+      border: 1px solid #2A2A2A; /* Dark gray border */
+      border-radius: 5px; /* Slightly rounded corners */
+      width: 100%;
     }
 
     th {
-      background-color: #028F76; /* Matches sidebar */
-      color: #FFEAAD; /* Header text color */
+      background-color: #2A2A2A; /* Slightly lighter black for headers */
+      color: #7AC142; /* Brighter green for headers */
+      text-align: center;
+      padding: 12px;
     }
 
-    th, td {
-      padding: 10px; /* Padding for table cells */
+    td {
+      padding: 10px;
+      text-align: center;
     }
 
-    /* Styles for the list group items */
-    .list-group-item {
-      background-color: #1C2130; /* Match the table background */
-      color: white; /* Set text color to white */
-      border: none; /* Remove border for a clean look */
+    /* Styling the input box and tables to have the same look */
+    .form-control {
+      background-color: #1B1B1B; /* Same dark background */
+      color: #A9D18E; /* Light green text */
+      border: 1px solid #2A2A2A; /* Dark border */
+      border-radius: 5px; /* Matching rounded corners */
+      padding: 10px;
     }
 
-    /* Sentiment badge styles */
+    .form-control:focus {
+      border-color: #7AC142; /* Brighter green on focus */
+      box-shadow: 0 0 5px #7AC142; /* Glow effect */
+    }
+
     .badge {
-      background-color: #FFEAAD; /* Change badge background color */
-      color: #1C2130; /* Sentiment text color */
+      background-color: #7AC142; /* Brighter green badge */
+      color: #121212; /* Black text for badges */
     }
 
-    /* Alert box styles */
-    .alert {
-      border-radius: 10px;
+    /* Button styles */
+    .btn-primary {
+      background-color: #7AC142; /* Brighter green buttons */
+      border-color: #7AC142;
+    }
+
+    .btn-primary:hover {
+      background-color: #A9D18E; /* Lighter green on hover */
+      border-color: #A9D18E;
     }
   </style>
 
@@ -119,46 +114,90 @@
 </head>
 
 <body>
-  <!-- Sidebar (left-aligned navbar) -->
-  <nav class="sidebar navbar navbar-expand-lg navbar-dark">
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+  <!-- Top navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#" style="color: #A9D18E;">TrendWise</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
-    
-    <!-- Centered Logo -->
-    <div class="logo">TrendWise</div>
-
-    <div class="collapse navbar-collapse" id="navbar">
-      <div class="navbar-nav flex-column w-100">
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
         {% if user.is_authenticated %}
-        <a class="nav-item nav-link" id="home" href="/">Research portal</a>
-        <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/">Research portal</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/logout">Logout</a>
+        </li>
         {% else %}
-        <a class="nav-item nav-link" id="login" href="/login">Login</a>
-        <a class="nav-item nav-link" id="signUp" href="/sign-up">Sign Up</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/login">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/sign-up">Sign Up</a>
+        </li>
         {% endif %}
-      </div>
+      </ul>
     </div>
   </nav>
+  
 
-  <!-- Main content section -->
-  <div class="content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
+  <div class="container">
+    {% block content %}
+    <!-- Data Tables Section (Table with Same Styling) -->
+    {% if headlines %}
+    <h3 align="center" style="color: #A9D18E;">Latest Headlines for {{ ticker }}:</h3>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Headline</th>
+            <th>Sentiment</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for headline, sentiment in headlines %}
+          <tr>
+            <td>{{ headline }}</td>
+            <td>{{ sentiment }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% endfor %}
     {% endif %}
-    {% endwith %}
 
-    <div class="container">
-      {% block content %} {% endblock %}
+    {% if stockdata %}
+    <h3 align="center" style="color: #A9D18E;">Financial Data for {{ ticker }}:</h3>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for metric, value in stockdata.items() %}
+          <tr>
+            <td>{{ metric }}</td>
+            <td>{{ value }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+    {% else %}
+    <p align="center" style="color: #A9D18E;">No financial data available for {{ ticker }}. Please try another stock.</p>
+    {% endif %}
+
+    {% if recommendation %}
+    <h3 align="center" style="color: #A9D18E;">GPT Recommendation:</h3>
+    <p align="center" style="color: #A9D18E;">
+      {{ recommendation }}
+    </p>
+    {% endif %}
+    {% endblock %}
   </div>
 
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"

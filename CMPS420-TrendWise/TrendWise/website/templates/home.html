@@ -2,25 +2,12 @@
 {% block title %}Stock Sentiment Analysis{% endblock %}
 
 {% block content %}
-<h1 align="center">Stock Sentiment Analysis Portal</h1>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
+<h1 align="center" style="color: #A9D18E;">Stock Sentiment Analysis Portal</h1>
 
 <form method="POST">
   <div class="form-group">
-    <label for="ticker">Enter Stock Ticker:</label>
-    <input type="text" name="ticker" id="ticker" class="form-control" placeholder="AAPL, TSLA, etc." required />
+    <label for="ticker" style="color: #A9D18E;">Enter Stock Ticker:</label>
+    <input type="text" name="ticker" id="ticker" class="form-control" placeholder="AAPL, TSLA, etc." required style="background-color: #1C2130; color: #A9D18E; border: 1px solid #A9D18E;" />
   </div>
   <div align="center">
     <button type="submit" class="btn btn-primary">Search Stock</button>
@@ -28,20 +15,20 @@
 </form>
 
 {% if headlines %}
-  <h3 align="center" style="color:#FFEAAD">Latest Headlines for {{ ticker }}:</h3>
+  <h3 align="center" style="color: #A9D18E;">Latest Headlines for {{ ticker }}:</h3>
   <div class="table-responsive">
     <table class="table table-bordered table-striped">
       <thead>
         <tr>
-          <th>Headline</th>
-          <th>Sentiment</th>
+          <th style="color: #A9D18E;">Headline</th>
+          <th style="color: #A9D18E;">Sentiment</th>
         </tr>
       </thead>
       <tbody>
         {% for headline, sentiment in headlines %}
           <tr>
-            <td style="color:#FFEAAD">{{ headline }}</td>
-            <td style="color:#FFEAAD">{{ sentiment }}</td>
+            <td style="color: #A9D18E;">{{ headline }}</td>
+            <td style="color: #A9D18E;">{{ sentiment }}</td>
           </tr>
         {% endfor %}
       </tbody>
@@ -50,33 +37,34 @@
 {% endif %}
 
 {% if stockdata %}
-  <h3 align="center" style="color:#FFEAAD">Financial Data for {{ ticker }}:</h3>
+  <h3 align="center" style="color: #A9D18E;">Financial Data for {{ ticker }}:</h3>
   <div class="table-responsive">
     <table class="table table-bordered table-striped">
       <thead>
         <tr>
-          <th>Metric</th>
-          <th>Value</th>
+          <th style="color: #A9D18E;">Metric</th>
+          <th style="color: #A9D18E;">Value</th>
         </tr>
       </thead>
       <tbody>
         {% for metric, value in stockdata.items() %}
           <tr>
-            <td style="color:#FFEAAD">{{ metric }}</td>
-            <td style="color:#FFEAAD">{{ value }}</td>
+            <td style="color: #A9D18E;">{{ metric }}</td>
+            <td style="color: #A9D18E;">{{ value }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 {% else %}
-  <p align="center" style="color:#FFEAAD">No financial data available for {{ ticker }}. Please try another stock.</p>
+  <p align="center" style="color: #A9D18E;">No financial data available for {{ ticker }}. Please try another stock.</p>
 {% endif %}
 
 
+
 {% if recommendation %}
-  <h3 align="center" style="color:#FFEAAD">GPT Recommendation:</h3>
-  <p align="center" style="color:#FFEAAD">
+  <h3 align="center" style="color: #A9D18E;">GPT Recommendation:</h3>
+  <p align="center" style="color: #A9D18E;">
     {{ recommendation }}
   </p>
 {% endif %}

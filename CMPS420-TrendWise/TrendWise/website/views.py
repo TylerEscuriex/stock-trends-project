@@ -9,7 +9,6 @@ import os
 
 
 
-
 views = Blueprint('views', __name__)
 
 # Load the Hugging Face FinBERT model for sentiment analysis
@@ -121,4 +120,19 @@ def home():
         recommendation=recommendation,
         user=current_user
     )
+
+def get_stock_history(ticker):
+    """
+    Fetch historical stock data for the given ticker.
+    """
+    try:
+        stock = yf.Ticker(ticker)
+        history = stock.history(period="1mo")  # Fetch 1 month's data
+        return history
+    except Exception as e:
+        print(f"Error fetching historical data for {ticker}: {e}")
+        return None
+    
+    
+
 
