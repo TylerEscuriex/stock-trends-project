@@ -133,6 +133,10 @@ def get_stock_history(ticker):
         print(f"Error fetching historical data for {ticker}: {e}")
         return None
     
-    
+@views.route('/about', methods=['GET'])
+@login_required
+def about():
+    return render_template("about.html", user=current_user)
+
 
 
