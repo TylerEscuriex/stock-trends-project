@@ -5,14 +5,25 @@
 <h1 align="center" style="color: #A9D18E;">Stock Sentiment Analysis Portal</h1>
 
 <form method="POST">
-  <div class="form-group">
+  <div class="form-group position-relative">
     <label for="ticker" style="color: #A9D18E;">Enter Stock Ticker:</label>
-    <input type="text" name="ticker" id="ticker" class="form-control" placeholder="AAPL, TSLA, etc." required style="background-color: #1C2130; color: #A9D18E; border: 1px solid #A9D18E;" />
+    <input type="text" name="ticker" id="ticker" class="form-control" placeholder="AAPL, TSLA, etc." 
+           required style="background-color: #1C2130; color: #A9D18E; border: 1px solid #A9D18E;" autocomplete="off">
+    <ul id="ticker-suggestions" class="list-group position-absolute" 
+        style="background-color: #1C2130; color: #A9D18E; z-index: 1000; width: 100%; max-height: 200px; overflow-y: auto; display: none;">
+    </ul>
   </div>
   <div align="center">
     <button type="submit" class="btn btn-primary">Search Stock</button>
   </div>
 </form>
+
+{% if recommendation %}
+  <h3 align="center" style="color: #A9D18E;">GPT Recommendation:</h3>
+  <p align="center" style="color: #A9D18E;">
+    {{ recommendation }}
+  </p>
+{% endif %}
 
 {% if headlines %}
   <h3 align="center" style="color: #A9D18E;">Latest Headlines for {{ ticker }}:</h3>
@@ -57,16 +68,7 @@
     </table>
   </div>
 {% else %}
-  <p align="center" style="color: #A9D18E;">No financial data available for {{ ticker }}. Please try another stock.</p>
-{% endif %}
-
-
-
-{% if recommendation %}
-  <h3 align="center" style="color: #A9D18E;">GPT Recommendation:</h3>
-  <p align="center" style="color: #A9D18E;">
-    {{ recommendation }}
-  </p>
+  <p align="center" style="color: #A9D18E;"></p>
 {% endif %}
 
 {% endblock %}
