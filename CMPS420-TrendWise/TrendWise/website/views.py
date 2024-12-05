@@ -1,4 +1,4 @@
-import openai
+import google.generativeai as genai
 import requests
 from bs4 import BeautifulSoup
 from flask import Blueprint, render_template, request, flash
@@ -7,15 +7,14 @@ from transformers import pipeline
 import yfinance as yf
 import os
 
-
-
 views = Blueprint('views', __name__)
 
 # Load the Hugging Face FinBERT model for sentiment analysis
 nlp_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
 
-# Set your OpenAI API key (ensure this is securely stored in production)
-openai.api_key = 'your_openai_api_key_here'
+# Ensure the Gemini API key is correctly set
+api_key = "AIzaSyAQBhCNYN_LXsqK1miOLaNJPl5KW2Lt5vk"
+genai.configure(api_key=api_key)
 
 def scrape_headlines(ticker):
     base_url = f"https://finance.yahoo.com/quote/{ticker}?p={ticker}&.tsrc=fin-srch"
@@ -35,13 +34,10 @@ def scrape_headlines(ticker):
     return headlines
 
 def get_stockdata(ticker):
-    """
-    Fetches key financial data for a given stock ticker using yfinance.
-    """
+    """Fetch key financial data for the stock ticker using yfinance."""
     stock = yf.Ticker(ticker)
     stock_info = stock.info  # This provides a dictionary of financial information
     
-    # Select relevant financial data
     stockdata = {
         "Market Cap": stock_info.get("marketCap"),
         "Price-to-Earnings Ratio (P/E)": stock_info.get("trailingPE"),
@@ -54,37 +50,41 @@ def get_stockdata(ticker):
         "Net Income": stock_info.get("netIncomeToCommon"),
     }
 
-    # Filter out any None values from stockdata
-    stockdata = {key: value for key, value in stockdata.items() if value is not None}
-    
-    return stockdata if stockdata else None
+    # Filter out None values
+    return {key: value for key, value in stockdata.items() if value is not None} or None
 
-
-def generate_gpt_recommendation(ticker, headlines_sentiment, stockdata):
+def generate_gemini_recommendation(ticker, headlines_sentiment, stockdata):
+    """Generate stock recommendation using Gemini."""
     try:
-        # Prepare the data for the API
-        prompt = f"Given the following stock data for {ticker}:\n\n" \
-                 f"Headlines and Sentiments:\n" + \
-                 "\n".join([f"{headline}: {sentiment}" for headline, sentiment in headlines_sentiment]) + \
-                 "\n\nFinancial Data:\n" + \
-                 "\n".join([f"{key}: {value}" for key, value in stockdata.items()]) + \
-                 "\n\nBased on this data, should an investor consider buying, holding, or selling this stock? Provide a clear recommendation."
+        if not ticker:
+            raise ValueError("Ticker symbol is required.")
+        if not headlines_sentiment or not isinstance(headlines_sentiment, list):
+            raise ValueError("Headlines and sentiments must be a non-empty list.")
+        if not stockdata or not isinstance(stockdata, dict):
+            raise ValueError("Stock data must be a non-empty dictionary.")
 
-        # Corrected method call
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
+        headlines_formatted = "\n".join([f"- {headline}: {sentiment}" for headline, sentiment in headlines_sentiment])
+        stockdata_formatted = "\n".join([f"- {key}: {value}" for key, value in stockdata.items()])
+
+        prompt = (
+            f"Given the following stock data for {ticker}:\n\n"
+            f"Headlines and Sentiments:\n{headlines_formatted}\n\n"
+            f"Financial Data:\n{stockdata_formatted}\n\n"
+            "Based on this data, should an investor consider buying, holding, or selling this stock? "
+            "Provide a clear and concise recommendation."
         )
 
-        # Extract the generated response
-        recommendation = response['choices'][0]['message']['content']
-        return recommendation
+        # Call Gemini to generate text
+        response = genai.generate_text(prompt=prompt)
 
-    except Exception as e:
-        # Log the exact error
-        print(f"Error generating GPT recommendation: {e}")
-        return "Could not generate a recommendation due to an error." 
+        # Extract the recommendation text
+        return response.text if response else "No recommendation generated."
     
+    except Exception as e:
+        # Log or flash the error for debugging
+        print(f"Error generating Gemini recommendation: {e}")
+        return "Could not generate a recommendation due to an error."
+
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
@@ -107,7 +107,8 @@ def home():
                 flash(f'Found and analyzed headlines for {ticker}', category='success')
             
             if stockdata:
-                recommendation = generate_gpt_recommendation(ticker, headlines_sentiment, stockdata)
+                # Generate the recommendation
+                recommendation = generate_gemini_recommendation(ticker, headlines_sentiment, stockdata)
                 flash(f'Financial data retrieved for {ticker}', category='success')
             else:
                 flash(f'No financial data found for {ticker}. Some data might be unavailable for this stock.', category='warning')
@@ -116,27 +117,12 @@ def home():
         "home.html",
         headlines=headlines_sentiment,
         ticker=ticker,
-        stockdata=stockdata or {},  # Pass an empty dictionary if no stockdata
+        stockdata=stockdata or {},
         recommendation=recommendation,
         user=current_user
     )
 
-def get_stock_history(ticker):
-    """
-    Fetch historical stock data for the given ticker.
-    """
-    try:
-        stock = yf.Ticker(ticker)
-        history = stock.history(period="1mo")  # Fetch 1 month's data
-        return history
-    except Exception as e:
-        print(f"Error fetching historical data for {ticker}: {e}")
-        return None
-    
 @views.route('/about', methods=['GET'])
 @login_required
 def about():
     return render_template("about.html", user=current_user)
-
-
-

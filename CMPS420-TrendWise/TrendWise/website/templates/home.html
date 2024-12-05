@@ -19,10 +19,12 @@
 </form>
 
 {% if recommendation %}
-  <h3 align="center" style="color: #A9D18E;">GPT Recommendation:</h3>
+  <h3 align="center" style="color: #A9D18E;">Gemini Recommendation:</h3>
   <p align="center" style="color: #A9D18E;">
     {{ recommendation }}
   </p>
+{% else %}
+  <p align="center" style="color: #A9D18E;">No recommendation available at this time.</p>
 {% endif %}
 
 {% if headlines %}
