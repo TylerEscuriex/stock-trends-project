@@ -19,11 +19,8 @@ from dotenv import load_dotenv
 views = Blueprint('views', __name__)
 load_dotenv()
 
-# Load the Hugging Face FinBERT model for sentiment analysis
-nlp_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
 
-# Set your OpenAI API key (ensure this is securely stored in production)
-openai.api_key = 'your_openai_api_key_here'
+nlp_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
 
 def scrape_headlines(ticker):
     base_url = f"https://finance.yahoo.com/quote/{ticker}?p={ticker}&.tsrc=fin-srch"
@@ -45,7 +42,7 @@ def scrape_headlines(ticker):
 
 def get_stockdata(ticker):
     stock = yf.Ticker(ticker)
-    stock_info = stock.info  # Fetch financial information
+    stock_info = stock.info 
     
     stockdata = {
         "Market Cap": stock_info.get("marketCap"),
@@ -111,7 +108,6 @@ def home():
             stockdata = get_stockdata(ticker)
             history_data = get_stock_history(ticker)
 
-            # Generate graph for stock price history
             try:
                 stock = yf.Ticker(ticker)
                 data = stock.history(period="3mo")
