@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block title %}Stock Sentiment Analysis{% endblock %}
 
 {% block content %}
@@ -13,6 +14,20 @@
     <button type="submit" class="btn btn-primary">Search Stock</button>
   </div>
 </form>
+
+{% if recommendation %}
+  <h3 align="center" style="color: #A9D18E;">GPT Recommendation:</h3>
+  <p align="center" style="color: #A9D18E;">
+    {{ recommendation }}
+  </p>
+{% endif %}
+
+{% if graph_image %}
+  <div class="graph-container">
+    <h3 class="graph-title" style="color: #A9D18E;">Stock Price History for {{ ticker }}</h3>
+    <img src="data:image/png;base64,{{ graph_image }}" alt="Stock Graph" class="img-fluid" />
+  </div>
+{% endif %}
 
 {% if headlines %}
   <h3 align="center" style="color: #A9D18E;">Latest Headlines for {{ ticker }}:</h3>
@@ -57,16 +72,7 @@
     </table>
   </div>
 {% else %}
-  <p align="center" style="color: #A9D18E;">No financial data available for {{ ticker }}. Please try another stock.</p>
-{% endif %}
-
-
-
-{% if recommendation %}
-  <h3 align="center" style="color: #A9D18E;">GPT Recommendation:</h3>
-  <p align="center" style="color: #A9D18E;">
-    {{ recommendation }}
-  </p>
+  <p align="center" style="color: #A9D18E;"></p>
 {% endif %}
 
 {% endblock %}

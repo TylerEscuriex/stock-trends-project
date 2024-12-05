@@ -1,3 +1,4 @@
+import matplotlib
 import openai
 import requests
 from bs4 import BeautifulSoup
@@ -6,10 +7,17 @@ from flask_login import login_required, current_user
 from transformers import pipeline
 import yfinance as yf
 import os
-
+import pandas as pd
+import google.generativeai as genai
+import io
+import base64
+import matplotlib.pyplot as plt
+matplotlib.use('Agg')  # Use the Agg backend for non-GUI rendering
+from dotenv import load_dotenv
 
 
 views = Blueprint('views', __name__)
+load_dotenv()
 
 # Load the Hugging Face FinBERT model for sentiment analysis
 nlp_pipeline = pipeline("sentiment-analysis", model="ProsusAI/finbert")
@@ -34,14 +42,11 @@ def scrape_headlines(ticker):
     
     return headlines
 
+
 def get_stockdata(ticker):
-    """
-    Fetches key financial data for a given stock ticker using yfinance.
-    """
     stock = yf.Ticker(ticker)
-    stock_info = stock.info  # This provides a dictionary of financial information
+    stock_info = stock.info  # Fetch financial information
     
-    # Select relevant financial data
     stockdata = {
         "Market Cap": stock_info.get("marketCap"),
         "Price-to-Earnings Ratio (P/E)": stock_info.get("trailingPE"),
@@ -54,37 +59,38 @@ def get_stockdata(ticker):
         "Net Income": stock_info.get("netIncomeToCommon"),
     }
 
-    # Filter out any None values from stockdata
-    stockdata = {key: value for key, value in stockdata.items() if value is not None}
-    
-    return stockdata if stockdata else None
+    return {key: value for key, value in stockdata.items() if value is not None}
 
 
-def generate_gpt_recommendation(ticker, headlines_sentiment, stockdata):
+def generategpt_recommendation(ticker, headlines_sentiment, stockdata):
+    """Generate a stock recommendation using the Gemini API."""
     try:
-        # Prepare the data for the API
         prompt = f"Given the following stock data for {ticker}:\n\n" \
                  f"Headlines and Sentiments:\n" + \
-                 "\n".join([f"{headline}: {sentiment}" for headline, sentiment in headlines_sentiment]) + \
+                 "\n".join([f"{headline}: {sentiment}" for headline, sentiment,  in headlines_sentiment]) + \
                  "\n\nFinancial Data:\n" + \
                  "\n".join([f"{key}: {value}" for key, value in stockdata.items()]) + \
-                 "\n\nBased on this data, should an investor consider buying, holding, or selling this stock? Provide a clear recommendation."
+                 "\n\nBased on this data, should an investor consider buying, holding, or selling this stock? Provide a concise reccomendation, then give your reasoning."
 
-        # Corrected method call
-        response = openai.ChatCompletion.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        # Extract the generated response
-        recommendation = response['choices'][0]['message']['content']
-        return recommendation
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content(prompt)
+        return response.text
 
     except Exception as e:
-        # Log the exact error
-        print(f"Error generating GPT recommendation: {e}")
-        return "Could not generate a recommendation due to an error." 
-    
+        print(f"Error generating recommendation: {e}")
+        return "Could not generate a recommendation due to an error."
+
+
+def get_stock_history(ticker):
+    try:
+        stock = yf.Ticker(ticker)
+        history = stock.history(period="1mo")
+        return history.reset_index().to_dict(orient='records')
+    except Exception as e:
+        print(f"Error fetching historical data for {ticker}: {e}")
+        return None
+
+
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
@@ -92,22 +98,51 @@ def home():
     headlines_sentiment = None
     stockdata = None
     recommendation = None
+    history_data = None
+    graph_image = None
 
     if request.method == 'POST':
         ticker = request.form.get('ticker').upper()
 
-        if len(ticker) < 1:
+        if not ticker:
             flash('Please enter a valid stock ticker!', category='error')
         else:
             headlines = scrape_headlines(ticker)
             stockdata = get_stockdata(ticker)
+            history_data = get_stock_history(ticker)
+
+            # Generate graph for stock price history
+            try:
+                stock = yf.Ticker(ticker)
+                data = stock.history(period="3mo")
+
+                plt.figure(figsize=(12, 6))
+                plt.plot(data.index, data['Close'], label=f"{ticker} Close Prices")
+                plt.title(f"{ticker} Stock Prices - Last Month", color="#A9D18E")
+                plt.xlabel("Date", color="#A9D18E")
+                plt.ylabel("Price (USD)", color="#A9D18E")
+                plt.grid(color="gray", linestyle="--", linewidth=0.5)
+                plt.legend()
+                plt.gca().set_facecolor("#121212")
+                plt.gcf().set_facecolor("#1B1B1B")
+                plt.tick_params(colors="#A9D18E")
+
+                img = io.BytesIO()
+                plt.savefig(img, format='png', bbox_inches='tight')
+                img.seek(0)
+                graph_image = base64.b64encode(img.getvalue()).decode('utf-8')
+                img.close()
+                plt.close()
+            except Exception as e:
+                print(f"Error generating graph: {e}")
+                flash("Could not generate stock graph. Please try again.", category='warning')
 
             if headlines:
                 headlines_sentiment = [(headline, nlp_pipeline(headline)[0]['label']) for headline in headlines]
                 flash(f'Found and analyzed headlines for {ticker}', category='success')
-            
+
             if stockdata:
-                recommendation = generate_gpt_recommendation(ticker, headlines_sentiment, stockdata)
+                recommendation = generategpt_recommendation(ticker, headlines_sentiment, stockdata)
                 flash(f'Financial data retrieved for {ticker}', category='success')
             else:
                 flash(f'No financial data found for {ticker}. Some data might be unavailable for this stock.', category='warning')
@@ -116,23 +151,9 @@ def home():
         "home.html",
         headlines=headlines_sentiment,
         ticker=ticker,
-        stockdata=stockdata or {},  # Pass an empty dictionary if no stockdata
+        stockdata=stockdata or {},
         recommendation=recommendation,
+        history_data=history_data,
+        graph_image=graph_image,
         user=current_user
     )
-
-def get_stock_history(ticker):
-    """
-    Fetch historical stock data for the given ticker.
-    """
-    try:
-        stock = yf.Ticker(ticker)
-        history = stock.history(period="1mo")  # Fetch 1 month's data
-        return history
-    except Exception as e:
-        print(f"Error fetching historical data for {ticker}: {e}")
-        return None
-    
-    
-
-
